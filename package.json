@@ -1,0 +1,20 @@
+{
+  "name": "chatbot-interface",
+  "version": "1.0.0",
+  "description": "Simple chatbot interface with React and Tailwind CSS",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chatbot",
+    "react",
+    "tailwind"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

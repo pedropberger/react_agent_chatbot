@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .loading {
+            background-color: #d9edf7;
+            color: #31708f;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Test Tool</h1>
+    <div class="container">
+        <div class="card">
+            <h2>Direct API Test</h2>
+            <div class="input-group">
+                <input type="text" id="directPrompt" placeholder="Enter a test message" value="Hello, this is a test">
+                <button onclick="testDirectAPI()">Test Direct API</button>
+            </div>
+            <div id="directStatus" class="status"></div>
+            <h3>Response:</h3>
+            <pre id="directResponse">No response yet</pre>
+        </div>
+
+        <div class="card">
+            <h2>Proxy API Test</h2>
+            <div class="input-group">
+                <input type="text" id="proxyPrompt" placeholder="Enter a test message" value="Hello via proxy">
+                <button onclick="testProxyAPI()">Test Proxy API</button>
+            </div>
+            <div id="proxyStatus" class="status"></div>
+            <h3>Response:</h3>
+            <pre id="proxyResponse">No response yet</pre>
+        </div>
+    </div>
+
+    <script>
+        async function testDirectAPI() {
+            const prompt = document.getElementById('directPrompt').value;
+            const statusEl = document.getElementById('directStatus');
+            const responseEl = document.getElementById('directResponse');
+            
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Testing direct API connection...';
+            responseEl.textContent = 'Waiting for response...';
+            
+            try {
+                const response = await fetch('http://localhost:1234/api/prompt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt }),
+                    mode: 'cors',
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = 'Success! API is working correctly.';
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = `Error: API returned status ${response.status}`;
+                }
+                
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `Error: ${error.message}`;
+                responseEl.textContent = `Failed to connect to API: ${error.message}\n\nThis is likely a CORS issue. Try using the proxy instead.`;
+                console.error('API test error:', error);
+            }
+        }
+        
+        async function testProxyAPI() {
+            const prompt = document.getElementById('proxyPrompt').value;
+            const statusEl = document.getElementById('proxyStatus');
+            const responseEl = document.getElementById('proxyResponse');
+            
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Testing proxy API connection...';
+            responseEl.textContent = 'Waiting for response...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/prompt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt }),
+                    mode: 'cors',
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = 'Success! Proxy API is working correctly.';
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = `Error: Proxy API returned status ${response.status}`;
+                }
+                
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `Error: ${error.message}`;
+                responseEl.textContent = `Failed to connect to proxy: ${error.message}\n\nMake sure the proxy server is running (node cors-proxy.js)`;
+                console.error('Proxy API test error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
